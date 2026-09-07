@@ -4,6 +4,9 @@
  */
 
 export type PlasticityAlgorithm = 'hebbian' | 'delta' | 'bdh_sparse';
+export type ExperimentState = 'IDLE' | 'RUNNING' | 'PAUSED' | 'COMPLETE';
+export type SweepParameter = 'correlationAngleDeg' | 'sequenceLength' | 'learningRate' | 'decay';
+export type VisualStatus = 'healthy' | 'warning' | 'error' | 'active' | 'comparison';
 
 export interface TokenAssociation {
   index: number;
@@ -54,4 +57,43 @@ export interface GuidedStage {
   activeConfig: Partial<ExperimentConfig>;
   highlightedControls: string[];
   suggestedAction: string;
+}
+
+export interface MatrixSnapshot {
+  step: number;
+  matrix: Float64Array;
+  frobenius: number;
+  timestamp: number;
+}
+
+export interface TimelineEntry {
+  tokenIndex: number;
+  key: Float64Array;
+  value: Float64Array;
+  matrixState: Float64Array;
+  retrievalResult: Float64Array;
+  error: number;
+  cosineSimilarity: number;
+}
+
+export interface SweepConfig {
+  parameter: SweepParameter;
+  start: number;
+  end: number;
+  step: number;
+}
+
+export interface PinnedResult {
+  id: string;
+  config: ExperimentConfig;
+  readout: ReadoutResult;
+  timestamp: number;
+  label: string;
+}
+
+export interface PresetExperiment {
+  id: string;
+  name: string;
+  config: ExperimentConfig;
+  description: string;
 }

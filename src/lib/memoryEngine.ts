@@ -31,6 +31,14 @@ export interface SimulationOutput {
   frobenius: number;
   readout: ReadoutResult;
   fidelityCurve: CurvePoint[];
+  matrixSnapshots: Float64Array[]; // Intermediate matrices for replay
+  timeline: {
+    tokenIndex: number;
+    matrixState: Float64Array;
+    retrievalResult: Float64Array;
+    error: number;
+    cosineSimilarity: number;
+  }[];
 }
 
 export function runExperiment(config: ExperimentConfig): SimulationOutput {
@@ -91,6 +99,14 @@ export function runExperiment(config: ExperimentConfig): SimulationOutput {
 
   // 2. Sequential Fast Weights Updates
   let M = createMatrix(d, d);
+  const matrixSnapshots: Float64Array[] = [];
+  const timeline: {
+    tokenIndex: number;
+    matrixState: Float64Array;
+    retrievalResult: Float64Array;
+    error: number;
+    cosineSimilarity: number;
+  }[] = [];
 
   for (let t = 0; t < N; t++) {
     const { keyVector: k_t, valueVector: v_t } = associations[t];
@@ -141,6 +157,25 @@ export function runExperiment(config: ExperimentConfig): SimulationOutput {
         M[i] = Math.max(0, M[i] + eta * deltaM[i]); // Dale's non-negative clamp
       }
     }
+
+    // Capture snapshot after each update
+    const snapshot = new Float64Array(M.length);
+    for (let i = 0; i < M.length; i++) {
+      snapshot[i] = M[i];
+    }
+    matrixSnapshots.push(snapshot);
+
+    // Capture timeline entry for current token
+    const retrieval = normalize(matVecMul(M, k_t, d, d));
+    const error = l2Distance(v_t, retrieval);
+    const cosSim = cosineSimilarity(v_t, retrieval);
+    timeline.push({
+      tokenIndex: t,
+      matrixState: snapshot,
+      retrievalResult: retrieval,
+      error,
+      cosineSimilarity: cosSim,
+    });
   }
 
   // 3. Probing the Memory System
@@ -265,5 +300,7 @@ export function runExperiment(config: ExperimentConfig): SimulationOutput {
     frobenius: frobeniusNorm(M),
     readout,
     fidelityCurve,
+    matrixSnapshots,
+    timeline,
   };
 }
