@@ -31,6 +31,7 @@ import { SweepHeatmap } from './components/SweepHeatmap';
 import { PinnedResults } from './components/PinnedResults';
 import { SweepResults } from './components/SweepResults';
 import { LiveMemoryDemo } from './components/LiveMemoryDemo';
+import { AutomatedTests } from './components/AutomatedTests';
 
 export default function App() {
   const [isSpecModalOpen, setIsSpecModalOpen] = useState<boolean>(false);
@@ -448,6 +449,7 @@ export default function App() {
               associations={activeAssociations}
               probeIndex={safeProbeIndex}
               onSelectProbe={(idx) => setConfig(prev => ({ ...prev, probeIndex: idx }))}
+              readout={activeReadout}
             />
 
             <TruthBesideEstimate
@@ -461,6 +463,8 @@ export default function App() {
                   snapshots={liveState ? [liveState.matrix] : simulation.matrixSnapshots}
                   dimension={config.dimension}
                   frobenius={activeFrobenius}
+                  isLive={!!liveState}
+                  currentStep={liveState?.step || 0}
                 />
               ) : (
                 <SynapticHeatmap

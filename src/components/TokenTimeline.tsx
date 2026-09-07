@@ -1,17 +1,19 @@
 import React from 'react';
-import { TokenAssociation } from '../types';
-import { KeyRound } from 'lucide-react';
+import { TokenAssociation, ReadoutResult } from '../types';
+import { KeyRound, Eye, CheckCircle, XCircle } from 'lucide-react';
 
 interface TokenTimelineProps {
   associations: TokenAssociation[];
   probeIndex: number;
   onSelectProbe: (idx: number) => void;
+  readout?: ReadoutResult | null;
 }
 
 export const TokenTimeline: React.FC<TokenTimelineProps> = ({
   associations,
   probeIndex,
   onSelectProbe,
+  readout,
 }) => {
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 shadow-sm">
@@ -34,7 +36,7 @@ export const TokenTimeline: React.FC<TokenTimelineProps> = ({
             <button
               key={assoc.index}
               onClick={() => onSelectProbe(assoc.index)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-lg border text-left transition-all cursor-pointer font-mono ${
+              className={`flex-shrink-0 px-3 py-2 rounded-lg border text-left transition-all cursor-pointer font-mono min-w-[140px] ${
                 isProbed
                   ? 'bg-emerald-950/90 border-emerald-500 text-white shadow-sm ring-1 ring-emerald-500/50'
                   : 'bg-slate-950/70 border-slate-800 text-slate-300 hover:bg-slate-800/60 hover:border-slate-700'
@@ -43,20 +45,40 @@ export const TokenTimeline: React.FC<TokenTimelineProps> = ({
               aria-label={`${assoc.label}, ${weightPct}% retained weight${isProbed ? ', currently probed' : ''}`}
               aria-pressed={isProbed}
             >
-              <div className="flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center justify-between gap-2 text-xs mb-1">
                 <span className="font-bold">{assoc.label}</span>
                 {isProbed && (
-                  <span className="text-[10px] bg-emerald-500 text-slate-950 px-1 rounded font-sans font-semibold">
-                    PROBE
-                  </span>
+                  <Eye className="w-3 h-3 text-emerald-400" />
                 )}
               </div>
-              <div className="text-[10px] text-slate-400 flex items-center justify-between gap-2 mt-0.5">
-                <span>k_{assoc.index + 1} → v_{assoc.index + 1}</span>
+              <div className="text-[10px] text-slate-400 flex items-center justify-between gap-2">
+                <span>k→v</span>
                 <span className={`${weightPct < 90 ? 'text-amber-400' : 'text-slate-400'}`}>
                   {weightPct}%
                 </span>
               </div>
+              {isProbed && readout && (
+                <div className="mt-1.5 pt-1.5 border-t border-emerald-500/30">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-slate-400">Cos:</span>
+                    <span className={`font-bold ${readout.cosineSimilarity >= 0.95 ? 'text-emerald-400' : readout.cosineSimilarity >= 0.8 ? 'text-amber-400' : 'text-rose-400'}`}>
+                      {readout.cosineSimilarity.toFixed(3)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] mt-0.5">
+                    <span className="text-slate-400">L2:</span>
+                    <span className="text-slate-300">{readout.l2Error.toFixed(3)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] mt-0.5">
+                    <span className="text-slate-400">Match:</span>
+                    {readout.classificationMatch ? (
+                      <CheckCircle className="w-3 h-3 text-emerald-400" />
+                    ) : (
+                      <XCircle className="w-3 h-3 text-rose-400" />
+                    )}
+                  </div>
+                </div>
+              )}
             </button>
           );
         })}

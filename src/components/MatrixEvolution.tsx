@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, RotateCcw, Zap } from 'lucide-react';
 
 interface MatrixEvolutionProps {
   snapshots: Float64Array[];
   dimension: number;
   frobenius: number;
+  isLive?: boolean;
+  currentStep?: number;
 }
 
 export const MatrixEvolution: React.FC<MatrixEvolutionProps> = ({
   snapshots,
   dimension: d,
   frobenius,
+  isLive = false,
+  currentStep = 0,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(snapshots.length - 1);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Sync with live execution
+  useEffect(() => {
+    if (isLive) {
+      setCurrentIndex(Math.min(currentStep, snapshots.length - 1));
+    }
+  }, [isLive, currentStep, snapshots.length]);
 
   useEffect(() => {
     if (isPlaying && currentIndex < snapshots.length - 1) {
@@ -70,6 +81,7 @@ export const MatrixEvolution: React.FC<MatrixEvolutionProps> = ({
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
+          {isLive && <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />}
           <span className="text-sm font-semibold text-slate-200">Matrix Evolution</span>
           <span className="text-xs font-mono text-amber-400">
             Step {currentIndex + 1} / {snapshots.length}
