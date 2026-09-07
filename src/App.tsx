@@ -4,6 +4,8 @@ import {
   FileCode2,
   Dices,
   Play,
+  Copy,
+  RotateCcw,
 } from 'lucide-react';
 import { ExperimentConfig, ExperimentState, SweepConfig, PinnedResult } from './types';
 import { runExperiment } from './lib/memoryEngine';
@@ -215,10 +217,24 @@ export default function App() {
   };
 
   const handleRandomExperiment = () => {
+    const newSeed = Math.floor(Math.random() * 1000000);
     setConfig(prev => ({
       ...prev,
-      seed: Math.floor(Math.random() * 100000),
+      seed: newSeed,
     }));
+  };
+
+  const handleCopySeed = () => {
+    navigator.clipboard.writeText(config.seed.toString());
+  };
+
+  const handleRerunSeed = () => {
+    // Keep current seed but reset experiment state
+    setLiveState(null);
+    setCurrentStep(0);
+    if (engineRef.current) {
+      engineRef.current.reset();
+    }
   };
 
   const handleQuickResults = (results: any) => {
@@ -279,6 +295,22 @@ export default function App() {
               >
                 <Dices className="w-3.5 h-3.5 text-amber-400" />
                 <span>Random</span>
+              </button>
+              <button
+                onClick={handleCopySeed}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
+                aria-label="Copy seed"
+              >
+                <Copy className="w-3.5 h-3.5 text-amber-400" />
+                <span>Seed: {config.seed}</span>
+              </button>
+              <button
+                onClick={handleRerunSeed}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
+                aria-label="Rerun with current seed"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                <span>Re-run</span>
               </button>
               <button
                 onClick={() => setIsSpecModalOpen(true)}

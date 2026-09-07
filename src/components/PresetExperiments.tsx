@@ -69,7 +69,7 @@ const PRESETS: PresetExperiment[] = [
   },
   {
     id: 'bdh-sparse',
-    name: 'BDH Sparse Comparison',
+    name: 'BDH Sparse',
     description: 'Non-negative Dale plasticity',
     config: {
       dimension: 16,
@@ -113,18 +113,48 @@ const PRESETS: PresetExperiment[] = [
     },
   },
   {
-    id: 'deterministic-test',
-    name: 'Deterministic Test',
-    description: 'Reproducible seed experiment',
+    id: 'long-sequence-demo',
+    name: 'Long Sequence Demo',
+    description: 'Memory scaling demonstration',
+    config: {
+      dimension: 16,
+      sequenceLength: 64,
+      correlationAngleDeg: 90,
+      algorithm: 'delta',
+      decay: 0.99,
+      learningRate: 0.7,
+      probeIndex: 0,
+      seed: 42,
+    },
+  },
+  {
+    id: 'orthogonal-keys',
+    name: 'Orthogonal Keys',
+    description: 'Perfectly independent vectors',
+    config: {
+      dimension: 16,
+      sequenceLength: 8,
+      correlationAngleDeg: 90,
+      algorithm: 'hebbian',
+      decay: 1.0,
+      learningRate: 1.0,
+      probeIndex: 0,
+      seed: 42,
+    },
+  },
+  {
+    id: 'correlated-keys',
+    name: 'Correlated Keys',
+    description: 'Semantically similar tokens',
     config: {
       dimension: 16,
       sequenceLength: 4,
-      correlationAngleDeg: 30,
+      correlationAngleDeg: 20,
       algorithm: 'delta',
-      decay: 0.95,
-      learningRate: 1.0,
+      decay: 1.0,
+      learningRate: 0.8,
       probeIndex: 0,
-      seed: 12345,
+      seed: 42,
     },
   },
 ];
@@ -138,7 +168,9 @@ const getIcon = (id: string) => {
     case 'bdh-sparse': return Scale;
     case 'high-learning-rate': return Activity;
     case 'strong-decay': return Activity;
-    case 'deterministic-test': return Zap;
+    case 'long-sequence-demo': return Database;
+    case 'orthogonal-keys': return Zap;
+    case 'correlated-keys': return AlertTriangle;
     default: return Zap;
   }
 };
@@ -149,7 +181,7 @@ export const PresetExperiments: React.FC<PresetExperimentsProps> = ({ onLoadPres
       <div className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono mb-3">
         Preset Experiments
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
         {PRESETS.map((preset) => {
           const Icon = getIcon(preset.id);
           return (
