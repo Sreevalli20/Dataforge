@@ -1,11 +1,12 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Brain,
   FileCode2,
   Dices,
 } from 'lucide-react';
-import { ExperimentConfig, ExperimentState, SweepConfig } from './types';
+import { ExperimentConfig, ExperimentState, SweepConfig, PinnedResult } from './types';
 import { runExperiment } from './lib/memoryEngine';
+import { queryStringToConfig } from './lib/urlState';
 import { SynapticHeatmap } from './components/SynapticHeatmap';
 import { TruthBesideEstimate } from './components/TruthBesideEstimate';
 import { MemoryGauges } from './components/MemoryGauges';
@@ -21,6 +22,10 @@ import { MatrixEvolution } from './components/MatrixEvolution';
 import { PresetExperiments } from './components/PresetExperiments';
 import { QuickExperiments } from './components/QuickExperiments';
 import { ExportPanel } from './components/ExportPanel';
+import { AlgorithmComparison } from './components/AlgorithmComparison';
+import { SweepHeatmap } from './components/SweepHeatmap';
+import { PinnedResults } from './components/PinnedResults';
+import { SweepResults } from './components/SweepResults';
 
 export default function App() {
   const [isSpecModalOpen, setIsSpecModalOpen] = useState<boolean>(false);
@@ -31,6 +36,8 @@ export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [totalSteps, setCurrentTotalSteps] = useState(1);
   const [currentParameter, setCurrentParameter] = useState<string>('');
+  const [pinnedResults, setPinnedResults] = useState<PinnedResult[]>([]);
+  const [sweepResults, setSweepResults] = useState<any>(null);
 
   const [config, setConfig] = useState<ExperimentConfig>({
     dimension: 16,
@@ -42,6 +49,17 @@ export default function App() {
     probeIndex: 0,
     seed: 42,
   });
+
+  // Load config from URL on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.toString()) {
+      const loadedConfig = queryStringToConfig(urlParams.toString());
+      if (Object.keys(loadedConfig).length > 0) {
+        setConfig(prev => ({ ...prev, ...loadedConfig } as ExperimentConfig));
+      }
+    }
+  }, []);
 
   const handleRun = () => {
     setExperimentState('RUNNING');
@@ -115,7 +133,15 @@ export default function App() {
   };
 
   const handleQuickResults = (results: any) => {
-    console.log('Quick experiment results:', results);
+    setSweepResults(results);
+  };
+
+  const handlePinResult = (result: PinnedResult) => {
+    setPinnedResults(prev => [...prev, result]);
+  };
+
+  const handleUnpinResult = (id: string) => {
+    setPinnedResults(prev => prev.filter(r => r.id !== id));
   };
 
   const handleConfigChange = (newValues: Partial<ExperimentConfig>) => {
@@ -214,6 +240,11 @@ export default function App() {
         {/* Quick Experiments */}
         <QuickExperiments config={config} onResults={handleQuickResults} />
 
+        {/* Sweep Results */}
+        {sweepResults && (
+          <SweepResults results={sweepResults} />
+        )}
+
         {/* Main Workspace */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
           {/* Left Column: Controls & Quick Experiments (4 cols on lg) */}
@@ -228,6 +259,14 @@ export default function App() {
             <CrosstalkGraph
               fidelityCurve={simulation.fidelityCurve}
               currentAngle={config.correlationAngleDeg}
+            />
+
+            <PinnedResults
+              pinned={pinnedResults}
+              onPin={handlePinResult}
+              onUnpin={handleUnpinResult}
+              currentConfig={config}
+              currentReadout={simulation.readout}
             />
 
             <ExportPanel
@@ -272,6 +311,10 @@ export default function App() {
                 dimension={config.dimension}
               />
             </div>
+
+            <AlgorithmComparison config={config} />
+
+            <SweepHeatmap config={config} />
           </div>
         </div>
       </main>

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Download, Copy } from 'lucide-react';
+import { Download, Copy, Share2 } from 'lucide-react';
 import { ExperimentConfig, ReadoutResult } from '../types';
+import { getShareableURL } from '../lib/urlState';
 
 interface ExportPanelProps {
   config: ExperimentConfig;
@@ -90,10 +91,15 @@ Memory Ratio: ${(readout.kvCacheBytes / readout.fastWeightBytes).toFixed(2)}×
     navigator.clipboard.writeText(summary);
   };
 
+  const shareURL = () => {
+    const url = getShareableURL(config);
+    navigator.clipboard.writeText(url);
+  };
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
       <div className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono mb-3">
-        Export
+        Export & Share
       </div>
       <div className="grid grid-cols-2 gap-2">
         <button
@@ -130,6 +136,15 @@ Memory Ratio: ${(readout.kvCacheBytes / readout.fastWeightBytes).toFixed(2)}×
         >
           <Copy className="w-3.5 h-3.5" />
           <span>Copy Summary</span>
+        </button>
+
+        <button
+          onClick={shareURL}
+          className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-950/80 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-800 rounded-lg text-xs font-mono text-slate-300 transition-all cursor-pointer"
+          aria-label="Copy shareable URL"
+        >
+          <Share2 className="w-3.5 h-3.5" />
+          <span>Share URL</span>
         </button>
       </div>
     </div>

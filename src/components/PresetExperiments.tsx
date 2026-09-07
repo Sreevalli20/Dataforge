@@ -112,6 +112,21 @@ const PRESETS: PresetExperiment[] = [
       seed: 42,
     },
   },
+  {
+    id: 'deterministic-test',
+    name: 'Deterministic Test',
+    description: 'Reproducible seed experiment',
+    config: {
+      dimension: 16,
+      sequenceLength: 4,
+      correlationAngleDeg: 30,
+      algorithm: 'delta',
+      decay: 0.95,
+      learningRate: 1.0,
+      probeIndex: 0,
+      seed: 12345,
+    },
+  },
 ];
 
 const getIcon = (id: string) => {
@@ -123,6 +138,7 @@ const getIcon = (id: string) => {
     case 'bdh-sparse': return Scale;
     case 'high-learning-rate': return Activity;
     case 'strong-decay': return Activity;
+    case 'deterministic-test': return Zap;
     default: return Zap;
   }
 };
