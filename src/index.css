@@ -1,6 +1,145 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Base styles */
+body {
+  background: linear-gradient(135deg, #0a0e1a 0%, #0f172a 50%, #1e1b4b 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Subtle grid overlay for scientific feel */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Radial glow effect */
+body::after {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content sits above background effects */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Enhanced card styling */
+.bg-slate-900 {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.bg-slate-950 {
+  background: rgba(2, 6, 23, 0.98);
+  backdrop-filter: blur(10px);
+}
+
+/* Enhanced border styling */
+.border-slate-800 {
+  border-color: rgba(51, 65, 85, 0.6);
+  box-shadow: 0 0 0 1px rgba(51, 65, 85, 0.3);
+}
+
+/* Enhanced header */
+header {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Slider styling enhancement */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  border: 1px solid #334155;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #f59e0b;
+  border-radius: 50%;
+  margin-top: -5px;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  border: 1px solid #334155;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #f59e0b;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Card hover effect */
+.rounded-xl {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.rounded-xl:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
 
 /* Accessibility: Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
@@ -10,6 +149,14 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  
+  .rounded-xl:hover {
+    transform: none;
+  }
+  
+  button:hover:not(:disabled) {
+    transform: none;
   }
 }
 
