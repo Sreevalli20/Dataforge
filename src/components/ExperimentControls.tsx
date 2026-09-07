@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, RotateCcw, SkipForward } from 'lucide-react';
+import { Play, Pause, RotateCcw, SkipForward, StepForward, Gauge } from 'lucide-react';
 import { ExperimentState } from '../types';
 
 interface ExperimentControlsProps {
@@ -9,7 +9,10 @@ interface ExperimentControlsProps {
   onResume: () => void;
   onReset: () => void;
   onReplay: () => void;
+  onStep: () => void;
   canReplay: boolean;
+  speed: number;
+  onSpeedChange: (speed: number) => void;
 }
 
 export const ExperimentControls: React.FC<ExperimentControlsProps> = ({
@@ -19,7 +22,10 @@ export const ExperimentControls: React.FC<ExperimentControlsProps> = ({
   onResume,
   onReset,
   onReplay,
+  onStep,
   canReplay,
+  speed,
+  onSpeedChange,
 }) => {
   const getStateBadge = () => {
     switch (state) {
@@ -35,7 +41,7 @@ export const ExperimentControls: React.FC<ExperimentControlsProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/95 border border-slate-700 rounded-lg px-4 py-2 flex items-center gap-3">
+    <div className="bg-slate-900/95 border border-slate-700 rounded-lg px-4 py-2 flex items-center gap-3 flex-wrap">
       {getStateBadge()}
       
       <div className="w-px h-6 bg-slate-700" />
@@ -59,6 +65,17 @@ export const ExperimentControls: React.FC<ExperimentControlsProps> = ({
         >
           <Pause className="w-3.5 h-3.5" />
           <span>Pause</span>
+        </button>
+      ) : null}
+
+      {state === 'PAUSED' || state === 'RUNNING' ? (
+        <button
+          onClick={onStep}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold transition-all cursor-pointer"
+          aria-label="Step forward"
+        >
+          <StepForward className="w-3.5 h-3.5" />
+          <span>Step</span>
         </button>
       ) : null}
 
@@ -92,6 +109,24 @@ export const ExperimentControls: React.FC<ExperimentControlsProps> = ({
           <span>Replay</span>
         </button>
       ) : null}
+
+      <div className="w-px h-6 bg-slate-700" />
+
+      <div className="flex items-center gap-2">
+        <Gauge className="w-3.5 h-3.5 text-cyan-400" />
+        <span className="text-xs text-slate-400">Speed:</span>
+        <select
+          value={speed}
+          onChange={(e) => onSpeedChange(Number(e.target.value))}
+          className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white font-mono cursor-pointer"
+          aria-label="Execution speed"
+        >
+          <option value={1000}>Slow</option>
+          <option value={500}>Normal</option>
+          <option value={200}>Fast</option>
+          <option value={50}>Max</option>
+        </select>
+      </div>
     </div>
   );
 };

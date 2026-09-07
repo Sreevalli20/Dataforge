@@ -1,11 +1,13 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   Brain,
   FileCode2,
   Dices,
+  Play,
 } from 'lucide-react';
 import { ExperimentConfig, ExperimentState, SweepConfig, PinnedResult } from './types';
 import { runExperiment } from './lib/memoryEngine';
+import { createLiveExecutionEngine, LiveState } from './lib/liveExecutionEngine';
 import { queryStringToConfig } from './lib/urlState';
 import { SynapticHeatmap } from './components/SynapticHeatmap';
 import { TruthBesideEstimate } from './components/TruthBesideEstimate';
@@ -26,6 +28,7 @@ import { AlgorithmComparison } from './components/AlgorithmComparison';
 import { SweepHeatmap } from './components/SweepHeatmap';
 import { PinnedResults } from './components/PinnedResults';
 import { SweepResults } from './components/SweepResults';
+import { LiveMemoryDemo } from './components/LiveMemoryDemo';
 
 export default function App() {
   const [isSpecModalOpen, setIsSpecModalOpen] = useState<boolean>(false);
@@ -38,6 +41,9 @@ export default function App() {
   const [currentParameter, setCurrentParameter] = useState<string>('');
   const [pinnedResults, setPinnedResults] = useState<PinnedResult[]>([]);
   const [sweepResults, setSweepResults] = useState<any>(null);
+  const [speed, setSpeed] = useState(500);
+  const [liveState, setLiveState] = useState<LiveState | null>(null);
+  const engineRef = useRef<ReturnType<typeof createLiveExecutionEngine> | null>(null);
 
   const [config, setConfig] = useState<ExperimentConfig>({
     dimension: 16,
@@ -63,21 +69,67 @@ export default function App() {
 
   const handleRun = () => {
     setExperimentState('RUNNING');
-    setTimeout(() => {
-      setExperimentState('COMPLETE');
-    }, 500);
+    
+    // Create fresh engine
+    const engine = createLiveExecutionEngine(config);
+    engineRef.current = engine;
+    
+    const runLoop = async () => {
+      while (!engine.isPaused && !engine.isComplete) {
+        const state = engine.stepForward();
+        setLiveState(state);
+        setCurrentStep(state.step);
+        
+        if (state.isComplete) {
+          setExperimentState('COMPLETE');
+          break;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, speed));
+      }
+    };
+    
+    runLoop();
   };
 
   const handlePause = () => {
     setExperimentState('PAUSED');
+    if (engineRef.current) {
+      engineRef.current.pause();
+    }
   };
 
   const handleResume = () => {
     setExperimentState('RUNNING');
+    if (engineRef.current) {
+      engineRef.current.resume();
+      
+      const engine = engineRef.current;
+      const runLoop = async () => {
+        while (!engine.isPaused && !engine.isComplete) {
+          const state = engine.stepForward();
+          setLiveState(state);
+          setCurrentStep(state.step);
+          
+          if (state.isComplete) {
+            setExperimentState('COMPLETE');
+            break;
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, speed));
+        }
+      };
+      runLoop();
+    }
   };
 
   const handleReset = () => {
     setExperimentState('IDLE');
+    setLiveState(null);
+    setCurrentStep(0);
+    if (engineRef.current) {
+      engineRef.current.reset();
+    }
     setConfig({
       dimension: 16,
       sequenceLength: 1,
@@ -93,9 +145,46 @@ export default function App() {
   const handleReplay = () => {
     setExperimentState('RUNNING');
     setCurrentStep(0);
-    setTimeout(() => {
-      setExperimentState('COMPLETE');
-    }, 500);
+    
+    // Reset and recreate engine
+    const engine = createLiveExecutionEngine(config);
+    engineRef.current = engine;
+    
+    const runLoop = async () => {
+      while (!engine.isPaused && !engine.isComplete) {
+        const state = engine.stepForward();
+        setLiveState(state);
+        setCurrentStep(state.step);
+        
+        if (state.isComplete) {
+          setExperimentState('COMPLETE');
+          break;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, speed));
+      }
+    };
+    
+    runLoop();
+  };
+
+  const handleStep = () => {
+    if (engineRef.current) {
+      const state = engineRef.current.stepForward();
+      setLiveState(state);
+      setCurrentStep(state.step);
+      
+      if (state.isComplete) {
+        setExperimentState('COMPLETE');
+      }
+    }
+  };
+
+  const handleSpeedChange = (newSpeed: number) => {
+    setSpeed(newSpeed);
+    if (engineRef.current) {
+      engineRef.current.setSpeed(newSpeed);
+    }
   };
 
   const handleRunSweep = useCallback((sweepConfig: SweepConfig) => {
@@ -153,45 +242,81 @@ export default function App() {
     return runExperiment(config);
   }, [config]);
 
-  const safeProbeIndex = Math.min(config.probeIndex, simulation.associations.length - 1);
-  const currentToken = simulation.associations[safeProbeIndex] || simulation.associations[0];
+  // Use live state if available, otherwise use static simulation
+  const activeReadout = liveState?.readout || simulation.readout;
+  const activeMatrix = liveState?.matrix || simulation.weightMatrix;
+  const activeFrobenius = liveState?.frobenius || simulation.frobenius;
+  const activeAssociations = liveState ? engineRef.current?.associations || simulation.associations : simulation.associations;
+  
+  const safeProbeIndex = Math.min(config.probeIndex, activeAssociations.length - 1);
+  const currentToken = activeAssociations[safeProbeIndex] || activeAssociations[0];
 
   return (
     <div className="min-h-screen text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* Top Navigation Bar */}
-      <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-40 px-4 py-3">
-        <div className="max-w-full mx-auto flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
-              <Brain className="w-5 h-5" />
+      {/* Hero Area with Central Claim */}
+      <header className="border-b border-slate-800 bg-slate-900/98 backdrop-blur-sm sticky top-0 z-40">
+        <div className="max-w-full mx-auto px-4 py-4">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                <Brain className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-white">
+                  DataForge
+                </h1>
+                <p className="text-xs text-slate-400 font-mono">
+                  Fast Weights × KV-Cache
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight text-white">
-                DataForge
-              </h1>
-              <p className="text-xs text-slate-400">
-                Fast Weights vs KV-Cache
-              </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleRandomExperiment}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
+                aria-label="Generate random experiment"
+              >
+                <Dices className="w-3.5 h-3.5 text-amber-400" />
+                <span>Random</span>
+              </button>
+              <button
+                onClick={() => setIsSpecModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
+                aria-label="Open technical specifications modal"
+              >
+                <FileCode2 className="w-3.5 h-3.5 text-amber-400" />
+                <span>Specs</span>
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRandomExperiment}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
-              aria-label="Generate random experiment"
-            >
-              <Dices className="w-3.5 h-3.5 text-amber-400" />
-              <span>Random</span>
-            </button>
-            <button
-              onClick={() => setIsSpecModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
-              aria-label="Open technical specifications modal"
-            >
-              <FileCode2 className="w-3.5 h-3.5 text-amber-400" />
-              <span>Specs</span>
-            </button>
+          {/* Central Claim */}
+          <div className="bg-gradient-to-r from-slate-950/80 to-slate-900/80 border border-slate-700/50 rounded-xl p-4 mb-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="px-2 py-1 rounded bg-indigo-950/50 border border-indigo-500/30 text-indigo-400 text-xs font-mono font-bold">
+                    O(1) LEARNED STATE
+                  </div>
+                  <span className="text-slate-500 font-mono text-xs">vs</span>
+                  <div className="px-2 py-1 rounded bg-sky-950/50 border border-sky-500/30 text-sky-400 text-xs font-mono font-bold">
+                    O(T·d) CACHE
+                  </div>
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Fast weights achieve <span className="text-indigo-400 font-semibold">constant memory</span> with synaptic plasticity, while KV-cache grows <span className="text-sky-400 font-semibold">linearly with sequence length</span>.
+                </p>
+              </div>
+              <button
+                onClick={handleRun}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-emerald-500/20 cursor-pointer border border-emerald-400/30"
+                aria-label="Run live experiment"
+              >
+                <Play className="w-4 h-4" />
+                <span>RUN LIVE EXPERIMENT</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -200,11 +325,11 @@ export default function App() {
       <main className="flex-1 w-full mx-auto p-4 space-y-3">
         {/* Live Metrics Bar */}
         <LiveMetricsBar
-          readout={simulation.readout}
+          readout={activeReadout}
           sequenceLength={config.sequenceLength}
           dimension={config.dimension}
           algorithm={config.algorithm}
-          frobenius={simulation.frobenius}
+          frobenius={activeFrobenius}
         />
 
         {/* Experiment Controls & Counter */}
@@ -216,13 +341,16 @@ export default function App() {
             onResume={handleResume}
             onReset={handleReset}
             onReplay={handleReplay}
+            onStep={handleStep}
             canReplay={simulation.matrixSnapshots.length > 0}
+            speed={speed}
+            onSpeedChange={handleSpeedChange}
           />
           <ExperimentCounter
             currentExperiment={currentExperiment}
             totalExperiments={totalExperiments}
-            currentStep={currentStep}
-            totalSteps={totalSteps}
+            currentStep={liveState?.step || currentStep}
+            totalSteps={liveState?.totalSteps || totalSteps}
             currentParameter={currentParameter}
             state={experimentState}
           />
@@ -236,6 +364,12 @@ export default function App() {
 
         {/* Preset Experiments */}
         <PresetExperiments onLoadPreset={handleLoadPreset} />
+
+        {/* Live Memory Demo */}
+        <LiveMemoryDemo config={config} />
+
+        {/* Automated Tests */}
+        <AutomatedTests config={config} onConfigChange={handleConfigChange} />
 
         {/* Quick Experiments */}
         <QuickExperiments config={config} onResults={handleQuickResults} />
@@ -266,12 +400,12 @@ export default function App() {
               onPin={handlePinResult}
               onUnpin={handleUnpinResult}
               currentConfig={config}
-              currentReadout={simulation.readout}
+              currentReadout={activeReadout}
             />
 
             <ExportPanel
               config={config}
-              readout={simulation.readout}
+              readout={activeReadout}
               timeline={simulation.timeline}
             />
           </div>
@@ -279,34 +413,34 @@ export default function App() {
           {/* Right Column: Visualizations (8 cols on lg) */}
           <div className="lg:col-span-8 space-y-3">
             <TokenTimeline
-              associations={simulation.associations}
+              associations={activeAssociations}
               probeIndex={safeProbeIndex}
               onSelectProbe={(idx) => setConfig(prev => ({ ...prev, probeIndex: idx }))}
             />
 
             <TruthBesideEstimate
-              readout={simulation.readout}
+              readout={activeReadout}
               probeLabel={currentToken ? currentToken.label : `Token #${safeProbeIndex + 1}`}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {simulation.matrixSnapshots.length > 1 ? (
+              {liveState || simulation.matrixSnapshots.length > 1 ? (
                 <MatrixEvolution
-                  snapshots={simulation.matrixSnapshots}
+                  snapshots={liveState ? [liveState.matrix] : simulation.matrixSnapshots}
                   dimension={config.dimension}
-                  frobenius={simulation.frobenius}
+                  frobenius={activeFrobenius}
                 />
               ) : (
                 <SynapticHeatmap
-                  matrix={simulation.weightMatrix}
+                  matrix={activeMatrix}
                   dimension={config.dimension}
-                  frobenius={simulation.frobenius}
+                  frobenius={activeFrobenius}
                 />
               )}
 
               <MemoryGauges
-                fastWeightBytes={simulation.readout.fastWeightBytes}
-                kvCacheBytes={simulation.readout.kvCacheBytes}
+                fastWeightBytes={activeReadout.fastWeightBytes}
+                kvCacheBytes={activeReadout.kvCacheBytes}
                 sequenceLength={config.sequenceLength}
                 dimension={config.dimension}
               />
