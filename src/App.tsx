@@ -1,11 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Brain,
   FileCode2,
   Sparkles,
   ExternalLink,
-  Layers,
-  Network,
 } from 'lucide-react';
 import { ExperimentConfig, GuidedStage } from './types';
 import { runExperiment } from './lib/memoryEngine';
@@ -17,12 +15,8 @@ import { TokenTimeline } from './components/TokenTimeline';
 import { ControlsPanel } from './components/ControlsPanel';
 import { GuidedStageEngine, GUIDED_STAGES } from './components/GuidedStageEngine';
 import { SpecViewerModal } from './components/SpecViewerModal';
-import { NeuralNetworkLab } from './components/NeuralNetworkLab';
 
 export default function App() {
-  // Top-level workspace tab
-  const [activeWorkspace, setActiveWorkspace] = useState<'neural-network' | 'frontier-substrate'>('neural-network');
-
   // Fast Weights Substrate State
   const [currentStageId, setCurrentStageId] = useState<number>(1);
   const [isSpecModalOpen, setIsSpecModalOpen] = useState<boolean>(false);
@@ -88,43 +82,16 @@ export default function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-sm font-bold tracking-tight text-white">
-                  Neural Weight & Plasticity Explorer
+                  Fast Weights vs. KV-Cache Explorer
                 </h1>
                 <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-700/50">
-                  Interactive Research Lab
+                  BDH Pathway Track
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Real-time backpropagation, weight matrices, activation dynamics, and vanishing/exploding gradient analysis
+                Synaptic plasticity, associative memory, and O(1) vs O(T·d) memory scaling
               </p>
             </div>
-          </div>
-
-          {/* Center Workspace Switcher */}
-          <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs font-mono">
-            <button
-              onClick={() => setActiveWorkspace('neural-network')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
-                activeWorkspace === 'neural-network'
-                  ? 'bg-amber-500 text-slate-950 shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Network className="w-3.5 h-3.5" />
-              <span>Weight Matrices & Gradients</span>
-            </button>
-
-            <button
-              onClick={() => setActiveWorkspace('frontier-substrate')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
-                activeWorkspace === 'frontier-substrate'
-                  ? 'bg-amber-500 text-slate-950 shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Fast Weights vs. KV-Cache (BDH)</span>
-            </button>
           </div>
 
           {/* Right Action: Specifications Modal */}
@@ -134,7 +101,7 @@ export default function App() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
             >
               <FileCode2 className="w-3.5 h-3.5 text-amber-400" />
-              <span>Devin Specs (9 Files)</span>
+              <span>Technical Specs</span>
             </button>
           </div>
         </div>
@@ -142,70 +109,62 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-4">
-        {activeWorkspace === 'neural-network' ? (
-          /* Workspace 1: Neural Network Weight Matrices & Gradient Flow Lab */
-          <NeuralNetworkLab />
-        ) : (
-          /* Workspace 2: Frontier Fast Weights vs KV-Cache Substrate */
-          <div className="space-y-4">
-            {/* Guided Stage Engine / Stepper */}
-            <GuidedStageEngine
-              currentStageId={currentStageId}
-              onSelectStage={handleSelectStage}
+        {/* Guided Stage Engine / Stepper */}
+        <GuidedStageEngine
+          currentStageId={currentStageId}
+          onSelectStage={handleSelectStage}
+        />
+
+        {/* Token Timeline Strip */}
+        <TokenTimeline
+          associations={simulation.associations}
+          probeIndex={safeProbeIndex}
+          onSelectProbe={(idx) => handleConfigChange({ probeIndex: idx })}
+        />
+
+        {/* Central Workspace: 2-Column Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Left Column: Parameter Controls (4 cols on lg) */}
+          <div className="lg:col-span-4 space-y-4">
+            <ControlsPanel
+              config={config}
+              onChangeConfig={handleConfigChange}
+              onReset={handleReset}
+              highlightedControls={activeStage.highlightedControls}
             />
 
-            {/* Token Timeline Strip */}
-            <TokenTimeline
-              associations={simulation.associations}
-              probeIndex={safeProbeIndex}
-              onSelectProbe={(idx) => handleConfigChange({ probeIndex: idx })}
+            {/* Live Crosstalk Curve */}
+            <CrosstalkGraph
+              fidelityCurve={simulation.fidelityCurve}
+              currentAngle={config.correlationAngleDeg}
+            />
+          </div>
+
+          {/* Right Column: Mathematical Visualizers & Truth-Beside-Estimate (8 cols on lg) */}
+          <div className="lg:col-span-8 space-y-4">
+            {/* Truth beside estimate */}
+            <TruthBesideEstimate
+              readout={simulation.readout}
+              probeLabel={currentToken ? currentToken.label : `Token #${safeProbeIndex + 1}`}
             />
 
-            {/* Central Workspace: 2-Column Responsive Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              {/* Left Column: Parameter Controls (4 cols on lg) */}
-              <div className="lg:col-span-4 space-y-4">
-                <ControlsPanel
-                  config={config}
-                  onChangeConfig={handleConfigChange}
-                  onReset={handleReset}
-                  highlightedControls={activeStage.highlightedControls}
-                />
+            {/* Bottom Row: Synaptic Heatmap + Memory Gauges */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <SynapticHeatmap
+                matrix={simulation.weightMatrix}
+                dimension={config.dimension}
+                frobenius={simulation.frobenius}
+              />
 
-                {/* Live Crosstalk Curve */}
-                <CrosstalkGraph
-                  fidelityCurve={simulation.fidelityCurve}
-                  currentAngle={config.correlationAngleDeg}
-                />
-              </div>
-
-              {/* Right Column: Mathematical Visualizers & Truth-Beside-Estimate (8 cols on lg) */}
-              <div className="lg:col-span-8 space-y-4">
-                {/* Truth beside estimate */}
-                <TruthBesideEstimate
-                  readout={simulation.readout}
-                  probeLabel={currentToken ? currentToken.label : `Token #${safeProbeIndex + 1}`}
-                />
-
-                {/* Bottom Row: Synaptic Heatmap + Memory Gauges */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <SynapticHeatmap
-                    matrix={simulation.weightMatrix}
-                    dimension={config.dimension}
-                    frobenius={simulation.frobenius}
-                  />
-
-                  <MemoryGauges
-                    fastWeightBytes={simulation.readout.fastWeightBytes}
-                    kvCacheBytes={simulation.readout.kvCacheBytes}
-                    sequenceLength={config.sequenceLength}
-                    dimension={config.dimension}
-                  />
-                </div>
-              </div>
+              <MemoryGauges
+                fastWeightBytes={simulation.readout.fastWeightBytes}
+                kvCacheBytes={simulation.readout.kvCacheBytes}
+                sequenceLength={config.sequenceLength}
+                dimension={config.dimension}
+              />
             </div>
           </div>
-        )}
+        </div>
 
         {/* Footer Scientific Callout */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs text-slate-400 flex flex-col md:flex-row items-center justify-between gap-3 font-mono">

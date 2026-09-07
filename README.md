@@ -9,7 +9,7 @@ An interactive educational application created for DataForge 2026 — Pathway Tr
 The application is fully implemented with:
 
 - **Genuinely interactive** real-time computation
-- **Computationally live** Float64 linear algebra engine
+- **Computationally live** Float64 linear algebra engine (8 bytes per element)
 - **Scientifically grounded** mathematical mechanisms
 - **Browser-accessible** 100% client-side execution
 - **Reproducible** deterministic PRNG with seed control
@@ -39,7 +39,7 @@ The application guides learners through 7 stages:
 
 The project distinguishes between different evidence levels:
 
-- **[DIRECT COMPUTATION]**: Calculations performed live in JavaScript (Float64 typed arrays)
+- **[DIRECT COMPUTATION]**: Calculations performed live in JavaScript (Float64 typed arrays, 8 bytes per element)
 - **[EDUCATIONAL TOY MODEL]**: Single-layer associative plasticity substrate (NOT the official BDH model)
 - **[PUBLISHED RESEARCH RESULT]**: Quantities from peer-reviewed literature (Hopfield bounds, BDH scaling)
 - **[THEORETICAL BOUND]**: Formal mathematical asymptotes (O(1) vs O(T·d) scaling)
@@ -48,7 +48,7 @@ The project distinguishes between different evidence levels:
 
 - **Framework**: React 19 + Vite 6 + TypeScript 5.8
 - **Styling**: Tailwind CSS v4 (neutral high-contrast typography)
-- **Math Engine**: In-memory Float64 dense matrix/vector operations
+- **Math Engine**: In-memory Float64 dense matrix/vector operations (8 bytes per element)
 - **State Management**: Reactive custom React hooks with deterministic PRNG
 - **Visualization**: SVG vector canvas & HTML5 Canvas for real-time heatmaps
 - **Testing**: Jest with ts-jest for computational correctness validation
@@ -114,6 +114,13 @@ Tests cover:
 - Computational primitives (outer products, matrix-vector multiplication, softmax)
 - Memory engine correctness (single-association reconstruction, capacity limits, determinism)
 - Algorithm differentiation (Hebbian vs. Delta Rule vs. BDH Sparse)
+- Memory footprint calculations (Float64 byte accuracy)
+
+### Type Checking
+
+```bash
+npm run lint
+```
 
 ### Build for Production
 
@@ -134,6 +141,15 @@ The application implements three plasticity update rules:
 1. **Pure Hebbian**: ΔM = η(v k^T)
 2. **Delta Rule**: ΔM = η(v - Mk)k^T (local error correction)
 3. **BDH Sparse Dale**: ΔM = clamp≥0(λM + η(ReLU(v) - M ReLU(k)) ReLU(k)^T)
+
+### Memory Footprint Calculations
+
+All memory calculations use Float64Array (8 bytes per element):
+
+- **Fast Weights**: d × d × 8 bytes (constant O(1))
+  - For d=16: 16 × 16 × 8 = 2,048 bytes (2 KB)
+- **KV-Cache**: 2 × N × d × 8 bytes (linear O(T·d))
+  - For N=4096, d=16: 2 × 4096 × 16 × 8 = 1,048,576 bytes (1,024 KB)
 
 ### BDH / BDH-CQ Connection
 
@@ -182,6 +198,14 @@ The application is designed for Vercel deployment:
 - Static build output
 - Works from public URL without authentication
 
+### Vercel Deployment Instructions
+
+1. Push repository to GitHub
+2. Import project in Vercel
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. No environment variables required
+
 ## Research Sources
 
 Primary research sources:
@@ -192,7 +216,7 @@ Primary research sources:
 - Pathway Research (2025) "BDH-CQ: Continuous Query Workflows"
 - Hopfield (1982) "Neural Networks and Physical Systems with Emergent Collective Computational Abilities"
 
-## AI Assistance
+## AI Assistance Disclosure
 
 This project was developed with AI assistance (Cascade). All AI-assisted code, research assistance, and writing assistance is disclosed per competition requirements. The registered team remains responsible for understanding, testing, validating, and defending the implementation.
 

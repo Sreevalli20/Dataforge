@@ -19,7 +19,7 @@ This test plan defines the mathematical invariants, unit validations, regression
 #### TEST-M03: Fast Weight Dimensional Invariance
 - **Rule**: For any sequence length $T \in [1, 1000]$, the dimensions of the fast-weight matrix $M$ must remain strictly $d \times d$.
 - **Assertion**:
-  $$\text{shape}(M_T) \equiv (d, d), \quad \text{byteLength}(M_T) \equiv d \times d \times 8 \text{ (Float64)}$$
+  $$\text{shape}(M_T) \equiv (d, d), \quad \text{byteLength}(M_T) \equiv d \times d \times 8 \text{ (Float64Array = 8 bytes per element)}$$
 
 #### TEST-M04: Single-Association Exact Reconstruction Invariant
 - **Rule**: Storing a single normalized pair $(k_1, v_1)$ into an empty matrix $M_0$ via Hebbian update must yield exact recall when probed with $k_1$:

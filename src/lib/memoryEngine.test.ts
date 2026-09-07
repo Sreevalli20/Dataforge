@@ -146,7 +146,7 @@ describe('Memory Engine - Experiment Pipeline Tests', () => {
 
       // Fast weight memory should be constant regardless of sequence length
       expect(result1.readout.fastWeightBytes).toBe(result2.readout.fastWeightBytes);
-      expect(result1.readout.fastWeightBytes).toBe(16 * 16 * 4); // d^2 * 4 bytes
+      expect(result1.readout.fastWeightBytes).toBe(16 * 16 * 8); // d^2 * 8 bytes (Float64)
     });
 
     it('should calculate linear O(T*d) memory for KV-cache', () => {
@@ -171,7 +171,7 @@ describe('Memory Engine - Experiment Pipeline Tests', () => {
 
       // KV-cache memory should scale linearly with sequence length
       expect(result2.readout.kvCacheBytes).toBeGreaterThan(result1.readout.kvCacheBytes);
-      expect(result2.readout.kvCacheBytes).toBe(2 * 32 * 16 * 4); // 2 * N * d * 4 bytes
+      expect(result2.readout.kvCacheBytes).toBe(2 * 32 * 16 * 8); // 2 * N * d * 8 bytes (Float64)
     });
   });
 

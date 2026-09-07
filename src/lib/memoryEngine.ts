@@ -190,10 +190,10 @@ export function runExperiment(config: ExperimentConfig): SimulationOutput {
   const classificationMatch = bestIdx === safeProbeIndex;
 
   // Memory calculation (bytes)
-  // Fast weights: d * d * 4 bytes (32-bit floats) or 8 bytes (64-bit)
-  const fastWeightBytes = d * d * 4;
-  // KV cache: 2 buffers * N tokens * d floats * 4 bytes
-  const kvCacheBytes = 2 * N * d * 4;
+  // Fast weights: d * d * 8 bytes (Float64Array = 8 bytes per element)
+  const fastWeightBytes = d * d * 8;
+  // KV cache: 2 buffers * N tokens * d floats * 8 bytes (Float64Array)
+  const kvCacheBytes = 2 * N * d * 8;
 
   // Crosstalk residual norm (unintended components)
   const crosstalkVec = createVector(d);

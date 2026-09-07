@@ -14,7 +14,6 @@ export const TruthBesideEstimate: React.FC<TruthBesideEstimateProps> = ({
   const {
     groundTruth: gt,
     fastWeightEstimate: fw,
-    kvCacheEstimate: kv,
     cosineSimilarity: cosSim,
     l2Error,
     classificationMatch,

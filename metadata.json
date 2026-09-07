@@ -1,6 +1,6 @@
 {
   "name": "Fast Weights vs KV-Cache Explorer",
-  "description": "Interactive visualization for neural network weight matrices, real-time backpropagation inspection, activation function comparisons (ReLU, Sigmoid, Tanh), and vanishing/exploding gradient failure mode analysis.",
+  "description": "Interactive educational application exploring synaptic plasticity, associative fast weights, and O(1) vs O(T·d) memory scaling in post-Transformer architectures. Grounded in Pathway's Dragon Hatchling (BDH) research.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

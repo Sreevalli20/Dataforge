@@ -19,14 +19,14 @@ The entire memory history is compressed into a single dynamic second-order synap
 $$M_t \in \mathbb{R}^{d \times d}$$
 - **Initial State ($t=0$):**
   $$M_0 = \mathbf{0}_{d \times d}$$
-- **Memory Footprint:** Constant $d \times d \times 4 \text{ bytes}$ (assuming 32-bit floats). For $d=16$, $16 \times 16 \times 4 = 1,024 \text{ bytes}$ ($1 \text{ KB}$), strictly $O(1)$ with respect to sequence length $T$.
+- **Memory Footprint:** Constant $d \times d \times 8 \text{ bytes}$ (Float64Array = 8 bytes per element). For $d=16$, $16 \times 16 \times 8 = 2,048 \text{ bytes}$ ($2 \text{ KB}$), strictly $O(1)$ with respect to sequence length $T$.
 
 #### 2.2 Baseline: Transformer KV-Cache State
 The standard multi-head attention cache accumulates all past key and value projections:
 $$\mathcal{K}_t = [k_1, k_2, \dots, k_t]^T \in \mathbb{R}^{t \times d}$$
 $$\mathcal{V}_t = [v_1, v_2, \dots, v_t]^T \in \mathbb{R}^{t \times d}$$
 - **Initial State ($t=0$):** Empty buffers $\mathcal{K}_0 = \emptyset, \mathcal{V}_0 = \emptyset$.
-- **Memory Footprint:** $2 \times t \times d \times 4 \text{ bytes}$. For $t=4096, d=16$, footprint is $524,288 \text{ bytes}$ ($512 \text{ KB}$), strictly $O(T \cdot d)$.
+- **Memory Footprint:** $2 \times t \times d \times 8 \text{ bytes}$ (Float64Array = 8 bytes per element). For $t=4096, d=16$, footprint is $1,048,576 \text{ bytes}$ ($1,024 \text{ KB}$), strictly $O(T \cdot d)$.
 
 ---
 
