@@ -67,7 +67,7 @@ export const MemoryGauges: React.FC<MemoryGaugesProps> = ({
             <span className="text-xs font-normal text-slate-400">Bytes</span>
           </div>
           <div className="text-[11px] text-slate-400 font-mono">
-            2 × {N} tokens × {d} dims × 4 bytes = {2 * N * d} floats
+            2 × {N} tokens × {d} dims × 8 bytes = {2 * N * d} floats
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@ export const MemoryGauges: React.FC<MemoryGaugesProps> = ({
           <strong className="text-amber-300 font-bold">{memoryRatio}×</strong> the size of Fast Weights state.
         </span>
         <span className="text-[10px] text-slate-400">
-          At T=4,096 tokens, KV-cache requires {(2 * 4096 * d * 4 / 1024).toFixed(1)} KB vs Fast Weights 1 KB.
+          At T=4,096 tokens, KV-cache requires {(2 * 4096 * d * 8 / 1024).toFixed(1)} KB vs Fast Weights {(d * d * 8 / 1024).toFixed(1)} KB.
         </span>
       </div>
     </div>

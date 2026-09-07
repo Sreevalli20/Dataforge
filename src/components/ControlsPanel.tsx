@@ -29,6 +29,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <button
           onClick={onReset}
           className="flex items-center gap-1 text-xs text-slate-400 hover:text-white px-2 py-0.5 rounded hover:bg-slate-800 transition-colors font-mono cursor-pointer"
+          aria-label="Reset all parameters to default values"
         >
           <RotateCcw className="w-3 h-3" /> Reset
         </button>
@@ -56,6 +57,11 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
           value={config.correlationAngleDeg}
           onChange={(e) => onChangeConfig({ correlationAngleDeg: Number(e.target.value) })}
           className="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+          aria-label="Key correlation angle theta"
+          aria-valuemin={0}
+          aria-valuemax={90}
+          aria-valuenow={config.correlationAngleDeg}
+          aria-valuetext={`${config.correlationAngleDeg} degrees`}
         />
         <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500 font-mono">
           <span>0° (Collinear Collision)</span>
@@ -142,6 +148,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             value={config.sequenceLength}
             onChange={(e) => onChangeConfig({ sequenceLength: Number(e.target.value) })}
             className="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+            aria-label="Sequence length N"
+            aria-valuemin={1}
+            aria-valuemax={32}
+            aria-valuenow={config.sequenceLength}
           />
           <div className="text-[10px] text-slate-500 mt-1 font-mono flex justify-between">
             <span>1</span>
@@ -188,6 +198,11 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             value={config.decay}
             onChange={(e) => onChangeConfig({ decay: Number(e.target.value) })}
             className="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+            aria-label="Decay lambda"
+            aria-valuemin={0.7}
+            aria-valuemax={1.0}
+            aria-valuenow={config.decay}
+            aria-valuetext={config.decay.toFixed(2)}
           />
           <div className="text-[9px] text-slate-500 mt-0.5 font-mono">1.0 = Perfect Memory</div>
         </div>
@@ -205,6 +220,11 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             value={config.learningRate}
             onChange={(e) => onChangeConfig({ learningRate: Number(e.target.value) })}
             className="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+            aria-label="Learning rate eta"
+            aria-valuemin={0.2}
+            aria-valuemax={1.8}
+            aria-valuenow={config.learningRate}
+            aria-valuetext={config.learningRate.toFixed(1)}
           />
           <div className="text-[9px] text-slate-500 mt-0.5 font-mono">Gradient Step Size</div>
         </div>
@@ -215,6 +235,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <button
           onClick={() => onChangeConfig({ seed: Math.floor(Math.random() * 100000) })}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"
+          aria-label="Generate new random seed for basis vectors"
         >
           <Dices className="w-3.5 h-3.5 text-amber-400" />
           <span>Re-roll Random Basis</span>

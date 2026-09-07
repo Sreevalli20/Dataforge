@@ -99,6 +99,7 @@ export default function App() {
             <button
               onClick={() => setIsSpecModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs font-bold transition-all border border-slate-700 cursor-pointer"
+              aria-label="Open technical specifications modal"
             >
               <FileCode2 className="w-3.5 h-3.5 text-amber-400" />
               <span>Technical Specs</span>
@@ -179,6 +180,7 @@ export default function App() {
             <button
               onClick={() => setIsSpecModalOpen(true)}
               className="text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+              aria-label="Inspect BDH source documents"
             >
               Inspect Source Documents <ExternalLink className="w-3 h-3" />
             </button>

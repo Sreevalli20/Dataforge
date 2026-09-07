@@ -25,7 +25,7 @@ export const TokenTimeline: React.FC<TokenTimelineProps> = ({
         <span className="text-[11px] text-slate-400">Click any token to probe its associative recall</span>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-thin">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-thin" role="list" aria-label="Token association sequence">
         {associations.map((assoc) => {
           const isProbed = assoc.index === probeIndex;
           const weightPct = Math.round(assoc.retainedWeight * 100);
@@ -39,6 +39,9 @@ export const TokenTimeline: React.FC<TokenTimelineProps> = ({
                   ? 'bg-emerald-950/90 border-emerald-500 text-white shadow-sm ring-1 ring-emerald-500/50'
                   : 'bg-slate-950/70 border-slate-800 text-slate-300 hover:bg-slate-800/60 hover:border-slate-700'
               }`}
+              role="listitem"
+              aria-label={`${assoc.label}, ${weightPct}% retained weight${isProbed ? ', currently probed' : ''}`}
+              aria-pressed={isProbed}
             >
               <div className="flex items-center justify-between gap-3 text-xs">
                 <span className="font-bold">{assoc.label}</span>

@@ -55,6 +55,7 @@ export const SpecViewerModal: React.FC<SpecViewerModalProps> = ({
           <button
             onClick={onClose}
             className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Close specifications modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -78,6 +79,9 @@ export const SpecViewerModal: React.FC<SpecViewerModalProps> = ({
                       ? 'bg-amber-950/60 border border-amber-500/50 text-amber-300 font-semibold'
                       : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'
                   }`}
+                  role="menuitem"
+                  aria-selected={isSelected}
+                  tabIndex={isSelected ? 0 : -1}
                 >
                   <FileText className={`w-4 h-4 mt-0.5 flex-shrink-0 ${isSelected ? 'text-amber-400' : 'text-slate-500'}`} />
                   <div>
@@ -135,6 +139,7 @@ export const SpecViewerModal: React.FC<SpecViewerModalProps> = ({
           <button
             onClick={onClose}
             className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+            aria-label="Close specifications viewer"
           >
             Close Viewer
           </button>

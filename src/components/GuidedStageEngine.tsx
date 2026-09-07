@@ -9,7 +9,7 @@ export const GUIDED_STAGES: GuidedStage[] = [
     tagline: 'Zero-Overhead Associative Memory',
     question: 'Can a fixed grid of numbers store an association without allocating token slots?',
     explanation:
-      'We initialize an empty matrix M = 0. A single association (k₁ → v₁) is bound into M via the Hebbian outer product M = v₁ k₁ᵀ. Probing with k₁ retrieves v̂ = M k₁ = v₁ with 0.0000 error, using strictly 1,024 bytes.',
+      'We initialize an empty matrix M = 0. A single association (k₁ → v₁) is bound into M via the Hebbian outer product M = v₁ k₁ᵀ. Probing with k₁ retrieves v̂ = M k₁ = v₁ with 0.0000 error, using strictly 2,048 bytes (16×16×8 Float64).',
     activeConfig: {
       dimension: 16,
       sequenceLength: 1,
@@ -85,7 +85,7 @@ export const GUIDED_STAGES: GuidedStage[] = [
     tagline: 'Fast Weights vs. KV-Cache Scaling',
     question: 'If KV-cache never forgets, why is frontier AI racing to replace it?',
     explanation:
-      'Standard Transformers keep all keys and values, scaling memory by O(T·d). At long horizons, the KV cache crashes GPU memory. Fast Weights maintain a strictly constant O(1) state (1,024 bytes). Above sequence length N > d (16 tokens), fast weights degrade, but their memory never budges.',
+      'Standard Transformers keep all keys and values, scaling memory by O(T·d). At long horizons, the KV cache crashes GPU memory. Fast Weights maintain a strictly constant O(1) state (2,048 bytes for d=16). Above sequence length N > d (16 tokens), fast weights degrade, but their memory never budges.',
     activeConfig: {
       dimension: 16,
       sequenceLength: 16,
@@ -185,6 +185,8 @@ export const GuidedStageEngine: React.FC<GuidedStageEngineProps> = ({
                     : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-white'
                 }`}
                 title={s.title}
+                aria-label={`Select ${s.title}`}
+                aria-current={isActive ? 'step' : undefined}
               >
                 {s.id === 7 ? 'Sandbox' : `S${s.id}`}
               </button>
@@ -222,6 +224,7 @@ export const GuidedStageEngine: React.FC<GuidedStageEngineProps> = ({
               onClick={handlePrev}
               disabled={isFirst}
               className="flex items-center gap-1 text-xs text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 cursor-pointer font-mono"
+              aria-label="Previous stage"
             >
               <ArrowLeft className="w-3 h-3" /> Prev
             </button>
@@ -229,6 +232,7 @@ export const GuidedStageEngine: React.FC<GuidedStageEngineProps> = ({
               onClick={handleNext}
               disabled={isLast}
               className="flex items-center gap-1 px-3 py-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 text-xs font-bold rounded font-mono transition-colors cursor-pointer"
+              aria-label="Next stage"
             >
               Next Stage <ArrowRight className="w-3 h-3" />
             </button>
