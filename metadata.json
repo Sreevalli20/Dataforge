@@ -1,0 +1,6 @@
+{
+  "name": "Fast Weights vs KV-Cache Explorer",
+  "description": "Interactive visualization for neural network weight matrices, real-time backpropagation inspection, activation function comparisons (ReLU, Sigmoid, Tanh), and vanishing/exploding gradient failure mode analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
