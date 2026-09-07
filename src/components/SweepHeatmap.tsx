@@ -5,9 +5,10 @@ import { runExperiment } from '../lib/memoryEngine';
 
 interface SweepHeatmapProps {
   config: ExperimentConfig;
+  onLoadConfig?: (config: Partial<ExperimentConfig>) => void;
 }
 
-export const SweepHeatmap = memo<SweepHeatmapProps>(({ config }) => {
+export const SweepHeatmap = memo<SweepHeatmapProps>(({ config, onLoadConfig }) => {
   const heatmapData = React.useMemo(() => {
     const data: { x: number; y: number; value: number }[] = [];
     const baseConfig = { ...config };
@@ -85,15 +86,17 @@ export const SweepHeatmap = memo<SweepHeatmapProps>(({ config }) => {
                 const value = getValueAt(angle, N);
                 
                 return (
-                  <div
+                  <button
                     key={`${angle}-${N}`}
+                    onClick={() => onLoadConfig?.({ correlationAngleDeg: angle, sequenceLength: N })}
                     style={{
                       width: `${cellSize}px`,
                       height: `${cellSize}px`,
                       backgroundColor: getColor(value),
                     }}
-                    className="rounded-sm transition-transform hover:scale-110 cursor-pointer"
+                    className="rounded-sm transition-transform hover:scale-110 cursor-pointer border-0 p-0"
                     title={`θ=${angle}°, N=${N}, cos=${value.toFixed(3)}`}
+                    aria-label={`Load experiment with angle ${angle} degrees and sequence length ${N}`}
                   />
                 );
               })

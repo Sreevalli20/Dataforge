@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sliders, Dices, RotateCcw } from 'lucide-react';
 import { ExperimentConfig, PlasticityAlgorithm } from '../types';
+import { Tooltip } from './Tooltip';
 
 interface ControlsPanelProps {
   config: ExperimentConfig;
@@ -46,6 +47,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
           <span className="text-slate-300 font-semibold flex items-center gap-1.5">
             Key Correlation Angle (θ)
+            <Tooltip content="Angular separation between key vectors. 90° = orthogonal (independent), 0° = collinear (maximum interference)" />
           </span>
           <span className="text-amber-400 font-bold">{config.correlationAngleDeg}°</span>
         </div>
@@ -98,8 +100,9 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             : 'bg-slate-950/60 border-slate-800/80'
         }`}
       >
-        <div className="text-xs text-slate-300 font-semibold mb-2 font-mono">
+        <div className="text-xs text-slate-300 font-semibold mb-2 font-mono flex items-center gap-1.5">
           Synaptic Plasticity Update Rule
+          <Tooltip content="Algorithm for updating the weight matrix M. Hebbian = simple outer product, Delta = error correction, BDH = non-negative sparse plasticity" />
         </div>
         <div className="grid grid-cols-3 gap-1.5">
           {(
@@ -137,7 +140,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
           }`}
         >
           <div className="flex items-center justify-between text-xs mb-1 font-mono">
-            <span className="text-slate-300">Length (N)</span>
+            <span className="text-slate-300 flex items-center gap-1.5">
+              Length (N)
+              <Tooltip content="Number of token associations stored in memory. Capacity limit is approximately d (dimension) for orthogonal keys" />
+            </span>
             <span className="text-amber-400 font-bold">{config.sequenceLength}</span>
           </div>
           <input
@@ -162,7 +168,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
 
         <div className="p-2.5 rounded-lg border bg-slate-950/60 border-slate-800/80">
           <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
-            <span className="text-slate-300">Dimension (d)</span>
+            <span className="text-slate-300 flex items-center gap-1.5">
+              Dimension (d)
+              <Tooltip content="Vector dimensionality. Higher d = more capacity but more computation. Memory scales as d² for fast weights" />
+            </span>
             <span className="text-amber-400 font-bold">{config.dimension}</span>
           </div>
           <div className="grid grid-cols-3 gap-1">
@@ -187,7 +196,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
       <div className="grid grid-cols-2 gap-2">
         <div className="p-2.5 rounded-lg border bg-slate-950/60 border-slate-800/80">
           <div className="flex items-center justify-between text-xs mb-1 font-mono">
-            <span className="text-slate-300">Decay (λ)</span>
+            <span className="text-slate-300 flex items-center gap-1.5">
+              Decay (λ)
+              <Tooltip content="Memory retention factor. λ=1.0 = perfect memory, λ<1.0 = exponential forgetting of older associations" />
+            </span>
             <span className="text-amber-400 font-bold">{config.decay.toFixed(2)}</span>
           </div>
           <input
@@ -209,7 +221,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
 
         <div className="p-2.5 rounded-lg border bg-slate-950/60 border-slate-800/80">
           <div className="flex items-center justify-between text-xs mb-1 font-mono">
-            <span className="text-slate-300">Rate (η)</span>
+            <span className="text-slate-300 flex items-center gap-1.5">
+              Rate (η)
+              <Tooltip content="Learning rate / step size for weight updates. Higher η = faster learning but potential instability" />
+            </span>
             <span className="text-amber-400 font-bold">{config.learningRate.toFixed(1)}</span>
           </div>
           <input

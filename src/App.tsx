@@ -484,7 +484,7 @@ export default function App() {
 
             <AlgorithmComparison config={config} />
 
-            <SweepHeatmap config={config} />
+            <SweepHeatmap config={config} onLoadConfig={handleConfigChange} />
           </div>
         </div>
       </main>
